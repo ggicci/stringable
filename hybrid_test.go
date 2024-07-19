@@ -9,7 +9,7 @@ import (
 )
 
 func TestHybridCoder_TestMarshalerOnly(t *testing.T) {
-	apple := &textMarshalerApple{}
+	apple := &TextMarshalerApple{}
 	rv := reflect.ValueOf(apple)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -22,7 +22,7 @@ func TestHybridCoder_TestMarshalerOnly(t *testing.T) {
 }
 
 func TestHybridCoder_TextUnmarshalerOnly(t *testing.T) {
-	banana := &textUnmarshalerBanana{}
+	banana := &TextUnmarshalerBanana{}
 	rv := reflect.ValueOf(banana)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -37,7 +37,7 @@ func TestHybridCoder_TextUnmarshalerOnly(t *testing.T) {
 }
 
 func TestHybridCoder_TestMarshaler_and_TextUnmarshaler(t *testing.T) {
-	orange := &textMarshalerAndUnmarshalerOrange{Content: "orange"}
+	orange := &TextMarshalerAndUnmarshalerOrange{Content: "orange"}
 	rv := reflect.ValueOf(orange)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -52,7 +52,7 @@ func TestHybridCoder_TestMarshaler_and_TextUnmarshaler(t *testing.T) {
 }
 
 func TestHybridCoder_StringMarshaler_TakesPrecedence(t *testing.T) {
-	peach := &stringMarshalerAndTextMarshalerPeach{Content: "peach"}
+	peach := &StringMarshalerAndTextMarshalerPeach{Content: "peach"}
 	rv := reflect.ValueOf(peach)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -66,7 +66,7 @@ func TestHybridCoder_StringMarshaler_TakesPrecedence(t *testing.T) {
 }
 
 func TestHybridCoder_StringUnmarshaler_TakesPrecedence(t *testing.T) {
-	peach := &stringUnmarshalerAndTextUnmarshalerPeach{Content: "peach"}
+	peach := &StringUnmarshalerAndTextUnmarshalerPeach{Content: "peach"}
 	rv := reflect.ValueOf(peach)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -81,7 +81,7 @@ func TestHybridCoder_StringUnmarshaler_TakesPrecedence(t *testing.T) {
 }
 
 func TestHybridCoder_StringMarshaler_and_TextUnmarshaler(t *testing.T) {
-	pineapple := &stringMarshalerAndTextUnmarshalerPineapple{Content: "pineapple"}
+	pineapple := &StringMarshalerAndTextUnmarshalerPineapple{Content: "pineapple"}
 	rv := reflect.ValueOf(pineapple)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -96,7 +96,7 @@ func TestHybridCoder_StringMarshaler_and_TextUnmarshaler(t *testing.T) {
 }
 
 func TestHybridCoder_MarshalText_Error(t *testing.T) {
-	watermelon := &textMarshalerSpoiledWatermelon{}
+	watermelon := &TextMarshalerSpoiledWatermelon{}
 	rv := reflect.ValueOf(watermelon)
 	sb := createHybridStringable(rv)
 	assert.NotNil(t, sb)
@@ -125,70 +125,119 @@ func TestHybridCoder_NilOnNoInterfacesDetected(t *testing.T) {
 	assert.Nil(t, sb)
 }
 
-type textMarshalerApple struct{} // only implements encoding.TextMarshaler
+// TextMarshalerApple implements:
+//   - StringMarshaler - no
+//   - StringUnmarshaler - no
+//   - encoding.TextMarshaler - yes
+//   - encoding.TextUnmarshaler - no
+type TextMarshalerApple struct{}
 
-func (t *textMarshalerApple) MarshalText() ([]byte, error) {
+func (t *TextMarshalerApple) MarshalText() ([]byte, error) {
 	return []byte("apple"), nil
 }
 
-type textUnmarshalerBanana struct{ Content string } // only implements encoding.TextUnmarshaler
+// TextUnmarshalerBanana implements:
+//   - StringMarshaler - no
+//   - StringUnmarshaler - no
+//   - encoding.TextMarshaler - no
+//   - encoding.TextUnmarshaler - yes
+type TextUnmarshalerBanana struct{ Content string }
 
-func (t *textUnmarshalerBanana) UnmarshalText(text []byte) error {
+func (t *TextUnmarshalerBanana) UnmarshalText(text []byte) error {
 	t.Content = string(text)
 	return nil
 }
 
-type textMarshalerAndUnmarshalerOrange struct{ Content string } // implements both encoding.TextMarshaler and encoding.TextUnmarshaler
+// TextMarshalerAndUnmarshalerOrange implements:
+//   - StringMarshaler - no
+//   - StringUnmarshaler - no
+//   - encoding.TextMarshaler - yes
+//   - encoding.TextUnmarshaler - yes
+type TextMarshalerAndUnmarshalerOrange struct{ Content string }
 
-func (t *textMarshalerAndUnmarshalerOrange) MarshalText() ([]byte, error) {
+func (t *TextMarshalerAndUnmarshalerOrange) MarshalText() ([]byte, error) {
 	return []byte(t.Content), nil
 }
 
-func (t *textMarshalerAndUnmarshalerOrange) UnmarshalText(text []byte) error {
+func (t *TextMarshalerAndUnmarshalerOrange) UnmarshalText(text []byte) error {
 	t.Content = string(text)
 	return nil
 }
 
-// implements internal.StringMarshaler and encoding.TextMarshaler
-// will use internal.StringMarshaler
-type stringMarshalerAndTextMarshalerPeach struct{ Content string }
+// StringMarshalerAndTextMarshalerPeach implements:
+//   - StringMarshaler - yes
+//   - StringUnmarshaler - no
+//   - encoding.TextMarshaler - yes
+//   - encoding.TextUnmarshaler - no
+type StringMarshalerAndTextMarshalerPeach struct{ Content string }
 
-func (s *stringMarshalerAndTextMarshalerPeach) ToString() (string, error) {
+func (s *StringMarshalerAndTextMarshalerPeach) ToString() (string, error) {
 	return "ToString:" + s.Content, nil
 }
 
-func (s *stringMarshalerAndTextMarshalerPeach) MarshalText() ([]byte, error) {
+func (s *StringMarshalerAndTextMarshalerPeach) MarshalText() ([]byte, error) {
 	return []byte("MarshalText:" + s.Content), nil
 }
 
-// implements internal.StringUnmarshaler and encoding.TextUnmarshaler
-// will use internal.StringUnmarshaler
-type stringUnmarshalerAndTextUnmarshalerPeach struct{ Content string }
+// StringUnmarshalerAndTextUnmarshalerPeach implements:
+//   - StringMarshaler - no
+//   - StringUnmarshaler - yes
+//   - encoding.TextMarshaler - no
+//   - encoding.TextUnmarshaler - yes
+type StringUnmarshalerAndTextUnmarshalerPeach struct{ Content string }
 
-func (s *stringUnmarshalerAndTextUnmarshalerPeach) FromString(text string) error {
+func (s *StringUnmarshalerAndTextUnmarshalerPeach) FromString(text string) error {
 	s.Content = "FromString:" + text
 	return nil
 }
 
-func (s *stringUnmarshalerAndTextUnmarshalerPeach) UnmarshalText(text []byte) error {
+func (s *StringUnmarshalerAndTextUnmarshalerPeach) UnmarshalText(text []byte) error {
 	s.Content = "UnmarshalText:" + string(text)
 	return nil
 }
 
-type stringMarshalerAndTextUnmarshalerPineapple struct{ Content string }
+// StringMarshalerAndTextUnmarshalerPineapple implements:
+//   - StringMarshaler - yes
+//   - StringUnmarshaler - no
+//   - encoding.TextMarshaler - no
+//   - encoding.TextUnmarshaler - yes
+type StringMarshalerAndTextUnmarshalerPineapple struct{ Content string }
 
-func (s *stringMarshalerAndTextUnmarshalerPineapple) ToString() (string, error) {
+func (s *StringMarshalerAndTextUnmarshalerPineapple) ToString() (string, error) {
 	return "ToString:" + s.Content, nil
 }
 
-func (s *stringMarshalerAndTextUnmarshalerPineapple) UnmarshalText(text []byte) error {
+func (s *StringMarshalerAndTextUnmarshalerPineapple) UnmarshalText(text []byte) error {
 	s.Content = "UnmarshalText:" + string(text)
 	return nil
 }
 
-type textMarshalerSpoiledWatermelon struct{}
+// StringMarshalerAndStringUnmarshalerCherry implements:
+//   - StringMarshaler - yes
+//   - StringUnmarshaler - yes
+//   - encoding.TextMarshaler - no
+//   - encoding.TextUnmarshaler - no
+type StringMarshalerAndStringUnmarshalerCherry struct {
+	Content string
+}
 
-func (t *textMarshalerSpoiledWatermelon) MarshalText() ([]byte, error) {
+func (s *StringMarshalerAndStringUnmarshalerCherry) FromString(text string) error {
+	s.Content = "FromString:" + text
+	return nil
+}
+
+func (s *StringMarshalerAndStringUnmarshalerCherry) ToString() (string, error) {
+	return "ToString:" + s.Content, nil
+}
+
+// TextMarshalerSpoiledWatermelon implements:
+//   - StringMarshaler - no
+//   - StringUnmarshaler - no
+//   - encoding.TextMarshaler - yes (but returns error)
+//   - encoding.TextUnmarshaler - no
+type TextMarshalerSpoiledWatermelon struct{}
+
+func (t *TextMarshalerSpoiledWatermelon) MarshalText() ([]byte, error) {
 	return nil, errors.New("spoiled")
 }
 

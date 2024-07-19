@@ -26,7 +26,7 @@ func TestNamespace_Adapt(t *testing.T) {
 func TestNamespace_NewWithHybridInstanceCreated(t *testing.T) {
 	ns := NewNamespace()
 
-	orange := &textMarshalerAndUnmarshalerOrange{Content: "orange"}
+	orange := &TextMarshalerAndUnmarshalerOrange{Content: "orange"}
 	sb, err := ns.New(orange)
 	assert.NoError(t, err)
 
@@ -37,4 +37,42 @@ func TestNamespace_NewWithHybridInstanceCreated(t *testing.T) {
 	err = sb.FromString("red orange")
 	assert.NoError(t, err)
 	assert.Equal(t, "red orange", orange.Content)
+}
+
+func TestNamespace_NewWithNoHybridOption(t *testing.T) {
+	ns := NewNamespace()
+
+	apple := &TextMarshalerApple{}
+	sb, err := ns.New(apple, NoHybrid())
+	assert.Nil(t, sb)
+	assert.ErrorIs(t, err, ErrUnsupportedType)
+
+	banana := &TextUnmarshalerBanana{"banana"}
+	sb, err = ns.New(banana, NoHybrid())
+	assert.Nil(t, sb)
+	assert.ErrorIs(t, err, ErrUnsupportedType)
+
+	cherry := &StringMarshalerAndStringUnmarshalerCherry{"cherry"}
+	sb, err = ns.New(cherry, NoHybrid())
+	assert.NotNil(t, sb)
+	assert.NoError(t, err)
+}
+
+func TestNamespace_NewWithCompleteHybridOption(t *testing.T) {
+	ns := NewNamespace()
+
+	apple := &TextMarshalerApple{}
+	sb, err := ns.New(apple, CompleteHybrid())
+	assert.Nil(t, sb)
+	assert.ErrorIs(t, err, ErrMissingUnmarshaler)
+
+	banana := &TextUnmarshalerBanana{"banana"}
+	sb, err = ns.New(banana, CompleteHybrid())
+	assert.Nil(t, sb)
+	assert.ErrorIs(t, err, ErrMissingMarshaler)
+
+	completePineapple := &StringMarshalerAndTextUnmarshalerPineapple{"pineapple"}
+	sb, err = ns.New(completePineapple, CompleteHybrid())
+	assert.NotNil(t, sb)
+	assert.NoError(t, err)
 }

@@ -28,6 +28,16 @@ func (h *hybrid) IsValid() bool {
 	return h.StringMarshaler != nil || h.StringUnmarshaler != nil
 }
 
+func (h *hybrid) validateAsComplete() error {
+	if h.StringMarshaler == nil {
+		return ErrMissingMarshaler
+	}
+	if h.StringUnmarshaler == nil {
+		return ErrMissingUnmarshaler
+	}
+	return nil
+}
+
 // createHybridStringable tries to create a hybrid Stringable from a
 // reflect.Value. It will make the most of the interfaces rv has implemented,
 // including stringable.StringMarshaler, stringable.StringUnmarshaler,

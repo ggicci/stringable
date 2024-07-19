@@ -23,7 +23,19 @@ func NewNamespace() *Namespace {
 }
 
 // New creates a Stringable instance from the given value.
-func (c *Namespace) New(v any) (Stringable, error) {
+func (c *Namespace) New(v any, opts ...Option) (Stringable, error) {
+	if vs, ok := v.(Stringable); ok {
+		return vs, nil
+	}
+
+	options := defaultOptions()
+	for _, opt := range opts {
+		opt(options)
+	}
+	return c.createStringable(v, options)
+}
+
+func (c *Namespace) createStringable(v any, opts *options) (Stringable, error) {
 	rv, ok := v.(reflect.Value)
 	if !ok {
 		rv = reflect.ValueOf(v)
@@ -48,8 +60,16 @@ func (c *Namespace) New(v any) (Stringable, error) {
 	}
 
 	// Try to create a hybrid Stringable from the reflect.Value.
-	if hybrid := createHybridStringable(rv); hybrid != nil {
-		return hybrid, nil
+	if !opts.Has(optionNoHybrid) {
+		h := createHybridStringable(rv)
+		if h != nil {
+			if opts.Has(optionCompleteHybrid) {
+				if err := h.(*hybrid).validateAsComplete(); err != nil {
+					return nil, err
+				}
+			}
+			return h, nil
+		}
 	}
 
 	return nil, unsupportedType(baseType)
