@@ -1,4 +1,4 @@
-package stringable
+package internal
 
 import (
 	"encoding/base64"
@@ -8,27 +8,6 @@ import (
 	"strings"
 	"time"
 )
-
-func init() {
-	builtinStringable[string](func(v *string) (Stringable, error) { return (*String)(v), nil })
-	builtinStringable[bool](func(v *bool) (Stringable, error) { return (*Bool)(v), nil })
-	builtinStringable[int](func(v *int) (Stringable, error) { return (*Int)(v), nil })
-	builtinStringable[int8](func(v *int8) (Stringable, error) { return (*Int8)(v), nil })
-	builtinStringable[int16](func(v *int16) (Stringable, error) { return (*Int16)(v), nil })
-	builtinStringable[int32](func(v *int32) (Stringable, error) { return (*Int32)(v), nil })
-	builtinStringable[int64](func(v *int64) (Stringable, error) { return (*Int64)(v), nil })
-	builtinStringable[uint](func(v *uint) (Stringable, error) { return (*Uint)(v), nil })
-	builtinStringable[uint8](func(v *uint8) (Stringable, error) { return (*Uint8)(v), nil })
-	builtinStringable[uint16](func(v *uint16) (Stringable, error) { return (*Uint16)(v), nil })
-	builtinStringable[uint32](func(v *uint32) (Stringable, error) { return (*Uint32)(v), nil })
-	builtinStringable[uint64](func(v *uint64) (Stringable, error) { return (*Uint64)(v), nil })
-	builtinStringable[float32](func(v *float32) (Stringable, error) { return (*Float32)(v), nil })
-	builtinStringable[float64](func(v *float64) (Stringable, error) { return (*Float64)(v), nil })
-	builtinStringable[complex64](func(v *complex64) (Stringable, error) { return (*Complex64)(v), nil })
-	builtinStringable[complex128](func(v *complex128) (Stringable, error) { return (*Complex128)(v), nil })
-	builtinStringable[time.Time](func(v *time.Time) (Stringable, error) { return (*Time)(v), nil })
-	builtinStringable[[]byte](func(b *[]byte) (Stringable, error) { return (*ByteSlice)(b), nil })
-}
 
 type String string
 

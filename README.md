@@ -48,14 +48,14 @@ sb.FromString("L(5,6)") // ErrNotStringUnmarshaler, "not a StringUnmarshaler"
 
 ## Adapt/Override Existing Types
 
-The [`Factory.Adapt()`](https://pkg.go.dev/github.com/ggicci/stringable#Adapt) API is used to customize the behaviour of `stringable.Stringable` of a specific type. The principal is to create a **type alias** to the target type you want to override, and implement the `Stringable` interface on the new type.
+The [`Namespace.Adapt()`](https://pkg.go.dev/github.com/ggicci/stringable#Namespace.Adapt) API is used to customize the behaviour of `stringable.Stringable` of a specific type. The principal is to create a **type alias** to the target type you want to override, and implement the `Stringable` interface on the new type.
 
 When should you use this API?
 
 1. change the conversion logic of the builtin types.
 2. change the conversion logic of existing types that are "hybridizable", but you don't want to change their implementations.
 
-For example, the default support of `bool` type in this package uses `strconv.ParseBool` method to convert strings like "true", "TRUE", "f", "0", etc. to a bool value. If you want to support also converting "YES", "NO", "はい" to a bool value, you can implement a custom bool type and register it to a `Factory` instance:
+For example, the default support of `bool` type in this package uses `strconv.ParseBool` method to convert strings like "true", "TRUE", "f", "0", etc. to a bool value. If you want to support also converting "YES", "NO", "はい" to a bool value, you can implement a custom bool type and register it to a `Namespace` instance:
 
 ```go
 type YesNo bool
@@ -81,13 +81,13 @@ func (yn *YesNo) FromString(s string) error {
 }
 
 func main() {
-	factory := stringable.NewFactory()
+	ns := stringable.NewNamespace()
 	typ, adaptor := ToAnyStringableAdaptor(func(b *bool) (Stringable, error) {
 		return (*YesNo)(b), nil
 	})
-	factory.Adapt(typ, adaptor)
+	ns.Adapt(typ, adaptor)
 
 	var yesno bool = true
-	sb, err := factory.New(&yesno)
+	sb, err := ns.New(&yesno)
 }
 ```

@@ -6,28 +6,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFactory_Adapt(t *testing.T) {
-	factory := NewFactory()
+func TestNamespace_Adapt(t *testing.T) {
+	ns := NewNamespace()
 	typ, adaptor := ToAnyStringableAdaptor(func(b *bool) (Stringable, error) {
 		return (*YesNo)(b), nil
 	})
-	factory.Adapt(typ, adaptor)
+	ns.Adapt(typ, adaptor)
 
-	assert.Contains(t, factory.adaptors, typ)
+	assert.Contains(t, ns.adaptors, typ)
 
 	var yesno bool = true
-	sb, err := factory.New(&yesno)
+	sb, err := ns.New(&yesno)
 	assert.NoError(t, err)
 	assert.NoError(t, sb.FromString("no"))
 	assert.False(t, yesno)
 	assert.ErrorContains(t, sb.FromString("false"), "invalid value")
 }
 
-func TestFactory_NewWithHybridInstanceCreated(t *testing.T) {
-	factory := NewFactory()
+func TestNamespace_NewWithHybridInstanceCreated(t *testing.T) {
+	ns := NewNamespace()
 
 	orange := &textMarshalerAndUnmarshalerOrange{Content: "orange"}
-	sb, err := factory.New(orange)
+	sb, err := ns.New(orange)
 	assert.NoError(t, err)
 
 	text, err := sb.ToString()

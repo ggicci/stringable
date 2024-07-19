@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ggicci/stringable/internal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -191,7 +192,7 @@ func testInteger[T Numeric](t *testing.T, vSuccess T, invalidStr string) {
 
 func testTime(t *testing.T, sv Stringable, fromStr string, expected time.Time, expectedToStr string) {
 	assert.NoError(t, sv.FromString(fromStr))
-	assert.True(t, equalTime(expected, time.Time(*sv.(*Time))))
+	assert.True(t, equalTime(expected, time.Time(*sv.(*internal.Time))))
 	ts, err := sv.ToString()
 	assert.NoError(t, err)
 	assert.Equal(t, expectedToStr, ts)

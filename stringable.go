@@ -18,9 +18,9 @@ type StringUnmarshaler interface {
 }
 
 // New creates a Stringable instance from the given value. Remember that this
-// function is a wrapper around defaultFactory.New, which means you're not able
+// function is a wrapper around defaultNS.New, which means you're not able
 // override/adapt existing types. If you want to override, you should create a
-// new Factory and register the custom types using the Adapt method.
+// new Namespace and register the custom types using the Adapt method.
 func New(v any) (Stringable, error) {
-	return defaultFactory.New(v)
+	return defaultNS.New(v)
 }
