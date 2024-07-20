@@ -18,14 +18,16 @@ sb.ToString()
 - `time.Time`
 - `[]byte`
 
-## Custom Types
+## The Hybrid Stringable Instance
 
-When calling `stringable.New(x)` with an instance `x` that is not any of the above builtin types, it will either create a _"hybrid" Stringable instance_ for you or return a `stringable.ErrUnsupportedType` error. Here is how the "hybrid" Stringable instance created:
+When calling `stringable.New(x)` with an instance `x` that is not a Stringable itself, nor any of the above builtin types, it will try to create a _"hybrid" Stringable instance_ from `x` for you.
+
+Here is how the "hybrid" Stringable instance will be created:
 
 1. Create a hybrid instance `h` from the given instance `x`;
-2. If `x` has implemented one of [`stringable.StringMarshaler`](https://pkg.go.dev/github.com/ggicci/stringable#StringMarshaler), [`encoding.TextMarshaler`](https://pkg.go.dev/encoding#TextMarshaler), `h` will use it as the implementation of `stringable.StringMarshaler`, i.e. the `ToString()` method;
-3. If `x` has implemented one of [`stringable.StringUnmarshaler`](https://pkg.go.dev/github.com/ggicci/stringable#StringUnmarshaler), [`encoding.TextUnmarshaler`](https://pkg.go.dev/encoding#TextUnmarshaler), `h` will use it as the implementation of `stringable.StringUnmarshaler`, i.e. the `FromString()` method;
-4. As long as `h` has an implementation of one of `stringable.StringMarshaler` and `stringable.StringUnmarshaler`, we consider `h` is a valid `Stringable` instance, and `stringable.New(x)` will return `h`, otherwise, a `stringable.ErrUnsupportedType` error.
+2. If `x` has implemented one of [`stringable.StringMarshaler`](https://pkg.go.dev/github.com/ggicci/stringable#StringMarshaler) and [`encoding.TextMarshaler`](https://pkg.go.dev/encoding#TextMarshaler), `h` will use it as the implementation of `stringable.StringMarshaler`, i.e. the `ToString()` method;
+3. If `x` has implemented one of [`stringable.StringUnmarshaler`](https://pkg.go.dev/github.com/ggicci/stringable#StringUnmarshaler) and [`encoding.TextUnmarshaler`](https://pkg.go.dev/encoding#TextUnmarshaler), `h` will use it as the implementation of `stringable.StringUnmarshaler`, i.e. the `FromString()` method;
+4. As long as `h` has an implementation of either `stringable.StringMarshaler` or `stringable.StringUnmarshaler`, we consider `h` is a valid `Stringable` instance. You can require both by passing in a [`CompleteHybrid()` option](#hybrid-options) to `New` method. For a valid `h`, `stringable.New(x)` will return `h`. Otherwise, an `ErrUnsupportedType` occurs.
 
 Example:
 
@@ -45,6 +47,11 @@ sb, err := stringable.New(loc) // err is nil
 sb.ToString() // L(3,4)
 sb.FromString("L(5,6)") // ErrNotStringUnmarshaler, "not a StringUnmarshaler"
 ```
+
+### Hybrid Options
+
+1. `New(v, NoHybrid())`: prevent `New` from trying to create a hybrid instance from `v` at all. Instead, returns `ErrUnsupportedType`.
+2. `New(v, CompleteHybrid())`: still allow `New` trying to create a hybrid instance from `v` if necessary, but with the present of `CompleteHybrid()` option, the returned hybrid instance must have a valid implementation of both `FromString` and `ToString`.
 
 ## Adapt/Override Existing Types
 

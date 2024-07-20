@@ -30,10 +30,10 @@ func (h *hybrid) IsValid() bool {
 
 func (h *hybrid) validateAsComplete() error {
 	if h.StringMarshaler == nil {
-		return ErrMissingMarshaler
+		return ErrNotStringMarshaler
 	}
 	if h.StringUnmarshaler == nil {
-		return ErrMissingUnmarshaler
+		return ErrNotStringUnmarshaler
 	}
 	return nil
 }

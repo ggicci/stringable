@@ -17,10 +17,10 @@ type StringUnmarshaler interface {
 	FromString(string) error
 }
 
-// New creates a Stringable instance from the given value. Remember that this
-// function is a wrapper around defaultNS.New, which means you're not able
-// override/adapt existing types. If you want to override, you should create a
-// new Namespace and register the custom types using the Adapt method.
+// New creates a Stringable instance from the given value. Note that
+// this method is a wrapper around the default namespace's New method.
+// Which means it doesn't support override/adapt existing types. Please
+// read Namespace.New to learn more.
 func New(v any) (Stringable, error) {
 	return defaultNS.New(v)
 }

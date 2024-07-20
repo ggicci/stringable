@@ -8,8 +8,11 @@ import (
 	"github.com/ggicci/stringable/internal"
 )
 
+// defaultNS is the default Namespace instance held by this package, where
+// we registered the adaptors for the builtin types, e.g. bool, int, string, etc.
 var defaultNS = NewNamespace()
 
+// Namespace is the place to register type adaptors (of AnyStringableAdaptor).
 type Namespace struct {
 	adaptors map[reflect.Type]AnyStringableAdaptor
 }
@@ -22,7 +25,35 @@ func NewNamespace() *Namespace {
 	}
 }
 
-// New creates a Stringable instance from the given value.
+// New creates a Stringable instance from the given value. If the given value itself
+// is already a Stringable, it will return directly. Otherwise, it will try to create
+// a Stringable instance by trying the following approaches:
+//  1. check if there's a custom adaptor for the type of the given value,
+//     if so, use it to adapt the given value to a Stringable.
+//  2. same as above, but check the builtin adaptors, which support the builtin types,
+//     e.g. int, string, float64, etc.
+//  3. try to create a "hybrid" instance, which makes use of the methods FromString,
+//     ToString, MarshalText and UnmarshalText to fullfill the Stringable interface.
+//
+// It has three options:
+//
+//	New(v)
+//
+// 1. with only default options, it will try all the 3 ways as listed above to
+// create a Stringable.
+//
+//	New(v, NoHybrid())
+//
+// 2. without hybrid, i.e. won't try the 3rd method, returns an
+// ErrUnsupportedType error.
+//
+//	New(v, CompleteHybrid())
+//
+// 3. the hybrid must be a "complete" hybrid, which means it has to implement
+// both FromString and ToString method that the Stringable interface requires,
+// while a "partial"/"incomplete" hybrid, one of theses two methods can be
+// absent, and the absent one always returns an error, either
+// ErrNotStringMarshaler or ErrNotStringUnmarshaler.
 func (c *Namespace) New(v any, opts ...Option) (Stringable, error) {
 	if vs, ok := v.(Stringable); ok {
 		return vs, nil
@@ -75,13 +106,17 @@ func (c *Namespace) createStringable(v any, opts *options) (Stringable, error) {
 	return nil, unsupportedType(baseType)
 }
 
-// Adapt registers a custom adaptor for the given type. You can call
-// ToAnyStringableAdaptor to create an adaptor of a specific type.
+// Adapt registers a custom adaptor for the given type.
+//
+//  1. You must create a Namespace instance and register the adaptor there.
+//  2. Call ToAnyStringableAdaptor to create an adaptor of a specific type.
 //
 // Example:
 //
 //	ns := stringable.NewNamespace()
-//	typ, adaptor := stringable.ToAnyStringableAdaptor[bool](func(b *bool) (stringable.Stringable, error) {})
+//	typ, adaptor := stringable.ToAnyStringableAdaptor[bool](func(b *bool) (stringable.Stringable, error) {
+//		// todo
+//	})
 //	ns.Adapt(typ, adaptor)
 func (c *Namespace) Adapt(typ reflect.Type, adaptor AnyStringableAdaptor) {
 	c.adaptors[typ] = adaptor
