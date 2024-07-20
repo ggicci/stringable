@@ -2,6 +2,11 @@
 
 A tiny go package that helps converting values from/to a string.
 
+[![Go](https://github.com/ggicci/stringable/actions/workflows/go.yaml/badge.svg)](https://github.com/ggicci/stringable/actions/workflows/go.yaml)
+[![codecov](https://codecov.io/gh/ggicci/stringable/graph/badge.svg?token=YU7FGGOY60)](https://codecov.io/gh/ggicci/stringable)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ggicci/stringable)](https://goreportcard.com/report/github.com/ggicci/stringable)
+[![Go Reference](https://pkg.go.dev/badge/github.com/ggicci/stringable.svg)](https://pkg.go.dev/github.com/ggicci/stringable)
+
 ## Basic API
 
 ```go
